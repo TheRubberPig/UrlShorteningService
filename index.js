@@ -21,6 +21,16 @@ app.get('/status', (req, res) => {
 });
 
 app.post('/url', (req, res) => {
-    console.log("Request Data", req.body)
-    res.send(hashingFuncs.basicHash(req.body.url));
+    if (req.body.url) {
+        const hashedData = hashingFuncs.basicHash(req.body.url);
+        const shortURL = {
+            "key": hashedData,
+            "longUrl": req.body.url,
+            "shortUrl": `http://localhost/${hashedData}`
+        }
+        res.send(shortURL);
+    } else {
+        const error = 'Missing parameter - url';
+        res.status(400).json({ error });
+    }
 });
