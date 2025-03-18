@@ -1,12 +1,10 @@
-require('dotenv').config();
-const { CosmosClient } = require('@azure/cosmos');
+const { AceBase } = require('acebase');
 const express = require('express');
 const app = express();
 app.use(express.json());
 var hashingFuncs = require('./hash');
 const port = process.env.port || 4000;
-const endpoint = process.env.COSMOS_DB_ENDPOINT;
-const key = process.env.COSMOS_DB_ENDPOINT;
+const db = new AceBase('urlDb');
 //const cosmosClient = new CosmosClient({endpoint, key});
 
 app.listen(port, () => {
@@ -28,9 +26,26 @@ app.post('/url', (req, res) => {
             "longUrl": req.body.url,
             "shortUrl": `http://localhost/${hashedData}`
         }
+        const ref = db.ref(`URLs/${hashedData}`).set({
+            "url": req.body.url,
+        });
         res.send(shortURL);
     } else {
         const error = 'Missing parameter - url';
         res.status(400).json({ error });
     }
+});
+
+app.get('/shutdown', (req, res) => {
+    res.status(200);
+    res.send();
+    db.close();
+    process.exit();
+})
+
+app.get('/url/:key', async (req, res) => {
+    const snapshot = await db.ref(`URLs/${req.params.key}`).get();
+    var value = snapshot.val();
+    console.log(value.url);
+    res.redirect(value.url);
 });
