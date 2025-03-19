@@ -17,7 +17,6 @@
   },
   "homepage": "https://github.com/TheRubberPig/UrlShorteningService#readme",
   "dependencies": {
-    "@azure/cosmos": "^4.2.0",
     "acebase": "^1.29.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2"
