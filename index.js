@@ -1,11 +1,14 @@
 const { AceBase } = require('acebase');
 const express = require('express');
+const cors = require('cors');
 const app = express();
+app.use(cors());
 app.use(express.json());
 var hashingFuncs = require('./hash');
 const port = process.env.port || 4000;
 const db = new AceBase('urlDb');
 
+app.options('/url', cors());
 app.listen(port, () => {
     console.log("Server Listening on PORT:", port);
 });
@@ -17,7 +20,8 @@ app.get('/status', (req, res) => {
     res.send(status);
 });
 
-app.post('/url', async (req, res) => {
+app.post('/url', cors(), async (req, res) => {
+    console.log(req.body);
     if (req.body.url) {
         const hashedData = hashingFuncs.basicHash(req.body.url);
         const shortURL = {
@@ -48,7 +52,7 @@ app.get('/shutdown', (req, res) => {
     process.exit();
 })
 
-app.get('/url/:key', async (req, res) => {
+app.get('/url/:key', cors() , async (req, res, next) => {
     const snapshot = await db.ref(`URLs/${req.params.key}`).get();
     var value = snapshot.val();
 
@@ -60,7 +64,7 @@ app.get('/url/:key', async (req, res) => {
     }
 });
 
-app.delete('/url/:key', async (req, res) => {
+app.delete('/url/:key', cors(), async (req, res, next) => {
     const snapshot = await db.ref(`URLs/${req.params.key}`).get();
     var value = snapshot.val();
     if (value) {
